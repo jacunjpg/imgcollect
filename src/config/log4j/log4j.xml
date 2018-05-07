@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration PUBLIC "-//APACHE//DTD LOG4J 1.2//EN" "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+	<appender name="consoleAppend" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- log console style -->
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} [%p] [%c] - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="DEBUG" />
+		</filter>
+	</appender> 
+
+	<appender name="fileAppend" class="org.apache.log4j.RollingFileAppender">
+		<!-- log out file path and name -->
+<!-- 		<param name="File" value="/home/runtimeLogs/exception.log" /> -->
+		<param name="File" value="c:/runtimeLogs/exception.log" />
+		<!-- is append while reboot -->
+		<param name="Append" value="true" />
+		<param name="MaxFileSize" value="10MB" />
+		<param name="MaxBackupIndex" value="100" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- log out file print style -->
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} [%p] [%l] - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="DEBUG" />
+		</filter>
+	</appender>
+
+	<appender name="ASYNC" class="org.apache.log4j.AsyncAppender">
+		<appender-ref ref="consoleAppend" />
+		<appender-ref ref="fileAppend" />
+	</appender>
+
+	<!-- print mybatis sql -->
+	<logger name="com.jolbox.bonecp" additivity="true">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="com.opensymphony.xwork2.conversion" additivity="true">
+		<level value="INFO" />
+	</logger>
+	<logger name="monitor.pictureseach.viewstream" additivity="true">
+        <level value="DEBUG" />
+    </logger>
+<!-- 	<logger name="monitor.pictureseach.BackDataCreateThread" additivity="true"> -->
+<!--         <level value="DEBUG" /> -->
+<!--     </logger> -->
+<!-- 	<logger name="monitor.pictureseach.BackDateMission" additivity="true"> -->
+<!--         <level value="DEBUG" /> -->
+<!--     </logger> -->
+	<!-- -->
+	<logger name="monitor.pictureseach.shudimission" additivity="true">
+		<level value="DEBUG" />
+	</logger>
+<!-- 	<logger name="org.apache.activemq" additivity="true"> -->
+<!-- 		<level value="DEBUG" /> -->
+<!-- 	</logger> -->
+<!-- 	<logger name="monitor.pictureseach.SendPicToMQ" additivity="true"> -->
+<!-- 		<level value="DEBUG" /> -->
+<!-- 	</logger> -->
+
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="consoleAppend" />
+		<appender-ref ref="fileAppend" />
+	</root>
+</log4j:configuration>

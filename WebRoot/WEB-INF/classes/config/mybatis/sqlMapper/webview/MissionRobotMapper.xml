@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MissionRobotMapper">
+	
+	<!-- 新增任务与机器人关联20170727 -->
+	<insert id="insertMissionRobot" parameterType="map" >
+		insert into mission_robot (id,missionid,robotid,flag,remark,createtime) 
+		values(#{id},#{missionid},#{robotid},'1',#{remark},#{createtime})
+	</insert>
+	
+</mapper>

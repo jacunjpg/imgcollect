@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="fljcMapper">
+	<!-- 插入比对检测任务 -->
+	<insert id="inserttomission" parameterType="map" >
+		insert into fljc_mission (type,datetime,user,style) values(#{type},#{datetime},#{user},#{style})
+	</insert>
+	
+	<select id="getmaxmissionid" resultType="dbinfo" parameterType="map">
+		select MAX(missionid) as missionid from fljc_mission u
+	</select>
+	
+	<insert id="inserttopicture" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+			insert into fljc_picture (picturename,picturepath,pictureurl,web,missionid) 
+			values(#{item.picturename},#{item.picturepath},#{item.pictureurl},#{item.web},#{item.missionid})
+		</foreach>
+	</insert>
+	
+	<select id="getmissionlistbytypeanduser" resultType="dbinfo" parameterType="map">
+		select missionid,datetime,style
+		from fljc_mission u
+		where user = #{user} and type= #{type}
+		order by missionid desc
+	</select>
+	
+	<select id="getresultsbymissionid" resultType="dbinfo" parameterType="map">
+		select fljc_picture.pictureid,fljc_result.point,fljc_result.similarpicturename,
+				fljc_result.datetime,fljc_picture.picturename,fljc_picture.picturepath,fljc_picture.pictureurl
+		from fljc_result left join fljc_picture on fljc_result.picturename = fljc_picture.picturename
+		where fljc_result.missionid = #{missionid} and fljc_result.point >= #{pointmin} and fljc_result.point &lt;= #{pointmax}
+		<if test="web != null and web != ''">
+			AND web = #{web}
+		</if>
+		<if test="name != null and name != ''">
+			AND name = #{name}
+		</if>
+		order by point DESC
+		
+	 </select>
+	 
+	 <select id="insertResultList" parameterType="java.util.List">
+		INSERT INTO fljc_result (picturename,point,missionid,datetime)
+        VALUES
+        <foreach collection="list" item="dbinfo" index="index" separator=",">
+         (
+         #{dbinfo.picturename},
+         #{dbinfo.point},
+         #{dbinfo.missionid},
+         #{dbinfo.datetime}
+         )
+        </foreach>
+	</select>
+	 
+	 <select id="getmissioninfo" resultType="dbinfo" parameterType="map">
+		select * from fljc_mission u
+		where  user = #{user} and type= #{type} and datetime = #{datetime}
+	</select>
+	
+	<update id="updatemission" parameterType="dbinfo">
+		UPDATE fljc_mission 
+		SET
+		style = #{style}
+		WHERE missionid =#{missionid}
+	</update>
+	
+	<delete id="deletemission" parameterType="dbinfo">
+		delete from fljc_mission 
+		WHERE missionid =#{missionid};
+		delete from fljc_picture
+		WHERE missionid =#{missionid};
+		delete from fljc_result
+		WHERE missionid =#{missionid};
+	</delete>
+	
+
+</mapper>

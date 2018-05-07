@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="CollecttaskMapper">
+	
+	
+	<!-- 查询未完成的机器人任务 -->
+    <select id="getTaskList" resultType="Collecttask" parameterType="map">
+		select * from collecttask where flag = 1
+	</select>
+	
+	<!-- 查询未完成的机器人任务 -->
+    <select id="getRunningTaskList" resultType="Collecttask" parameterType="map">
+		select * from collecttask where status in('2','4') and remark='1'
+	</select>
+	
+	<!-- 新增创建的抓取任务20170705 -->
+	<insert id="insertTaskInfo" parameterType="map" >
+		insert into collecttask (taskid,missionid,robot,addr,status,flag,remark,updatetime,createtime) 
+		values(#{taskid},#{missionid},#{robot},#{addr},'2',1,#{remark},#{updatetime},#{createtime})
+	</insert>
+	
+	<!-- 更新抓取任务表数据 -->
+	<update id="updateTaskInfo" parameterType="Collecttask">
+		UPDATE collecttask 
+		SET
+		status = #{status}
+		<if test='flag != null and flag !=""'>
+		, flag = 0
+		</if>
+		WHERE missionid =#{missionid}
+	</update>
+	
+	<!-- 根据机器人的id获取机器人的信息-->
+    <select id="getCollecttaskById" resultType="Collecttask" parameterType="map">
+        select * from collecttask where taskid = #{taskid}
+    </select>
+    
+    <!-- 根据任务id获取机器人信息-->
+    <select id="getUpdateTimeByMissionid" resultType="Collecttask" parameterType="map">
+        select * from collecttask where missionid = #{missionid}
+    </select>
+    
+    <!-- 更新机器人执行时间 -->
+    <update id="updateUpdateTimeByMissionid" parameterType="Collecttask">
+        UPDATE collecttask 
+        SET
+        updatetime = #{updatetime}
+        WHERE missionid =#{missionid}
+    </update>
+	
+</mapper>

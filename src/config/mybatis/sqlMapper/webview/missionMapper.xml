@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="missionMapper">
+	<!-- 插入拷贝检测任务 -->
+	<select id="getmissionlist" resultType="dbinfo" parameterType="map">
+		select missionid,datetime,style,query,user,searchmode,checkmode,cbkname
+		from mission_mission u
+		where user = #{user} and flag > '0'
+		order by missionid desc
+	</select>
+	
+	<delete id="deletemission"  parameterType="map">
+		update mission_mission
+		set
+		flag = '0'
+		where missionid = #{missionid}
+	</delete>
+	
+	<delete id="deletepicture"  parameterType="map">
+		delete from mission_picture
+		where missionid = #{missionid}
+	</delete>
+	
+	<delete id="deleteresult"  parameterType="map">
+		delete from mission_result
+		where missionid = #{missionid}
+	</delete>
+	
+	<insert id="insertmission" parameterType="map" >
+		insert into mission_mission (datetime,user,style,query,searchmode,checkmode,checkcbk,endtime,flag,pictureid,cbkname) 
+		values(#{datetime},#{user},#{style},#{query},#{searchmode},#{checkmode},#{checkcbk},#{endtime},#{flag},#{pictureid},#{cbkname})
+
+	</insert>
+	
+	<select id="getmissioninfo" resultType="dbinfo" parameterType="map">
+		select *
+		from mission_mission u
+		where missionid = #{missionid} 
+	</select>
+	
+	<select id="getcount" resultType="dbinfo" parameterType="map">
+<!-- 		<if test='checkmode == "6" ||checkmode == "7"'> -->
+<!-- 		select d.*,f.cbkid from ( -->
+<!-- 		</if> -->
+		select count(c.pictureid) as id  from mission_picture c left JOIN
+		mission_result b on c.picturename =b.picturename 
+		where c.missionid = #{missionid} 
+		<if test="pointmax != null and pointmax !='' and pointmin != null and pointmin !='' ">
+		and (b.point &lt;= ${pointmax} and b.point >= ${pointmin}
+		<if test='pointmin == "0"'>
+		or b.point is null
+		</if>
+		)
+		</if>
+		<if test='restype == "1" or resmokuai == "1"'>
+		and b.point > ${border1}
+		</if>
+		<if test='restype == "2" or resmokuai == "2"'>
+		and b.point > ${border2} and b.point &lt; ${border1}
+		</if>
+		<if test='restype == "3" or resmokuai == "3"'>
+		and (b.point > -2 and b.point &lt; ${border2} or b.point is null )
+		</if>
+		<if test='restype == "4" or resmokuai == "4"'>
+		and (b.point >= -2 or b.point is null )
+		</if>
+		<if test='web =="1" and web != null and web !=""'>
+		</if>
+		<if test='web !="1" and web != null and web !=""'>
+		and web = #{web}
+		</if>
+		<if test='datePicker != null and datePicker !="" and datePicker2 != null and datePicker2 !=""'>
+			and datetime>=#{datePicker} and datetime &lt;= #{datePicker2}
+		</if>
+		ORDER BY b.point desc
+		<!--  and (b.point is not null) -->
+		
+<!-- 		<if test='checkmode == "6"'> -->
+<!-- 		)d left join cbjc_cbkpicture f on d.similarpicturename=f.picturename where d.picturepath is not null ORDER BY d.point desc -->
+<!-- 		</if> -->
+<!-- 		<if test='checkmode == "7"'> -->
+<!-- 		)d left join rljc_cbkpicture f on d.similarpicturename=f.picturename where d.picturepath is not null ORDER BY d.point desc -->
+<!-- 		</if> -->
+		
+	</select>
+	
+	<select id="getresult" resultType="dbinfo" parameterType="map">
+		
+<!-- 		<if test='checkmode == "6" ||checkmode == "7"'> -->
+<!-- 		select d.*,f.cbkid from ( -->
+<!-- 		</if> -->
+		select c.pictureid,c.picturename,c.picturepath,c.pictureurl,c.web,b.point,b.similarpicturename,b.datetime,b.checkmode,b.cbkname from mission_picture c left JOIN
+		mission_result b on c.picturename =b.picturename 
+		where c.missionid = #{missionid} 
+		<if test="pointmax != null and pointmax !='' and pointmin != null and pointmin !='' ">
+		and (b.point &lt;= #{pointmax} and b.point >= #{pointmin}
+		<if test='pointmin == "0"'>
+		or b.point is null
+		</if>
+		)
+		</if>
+		<if test='restype == "1" or resmokuai == "1"'>
+		and b.point > ${border1}
+		</if>
+		<if test='restype == "2" or resmokuai == "2"'>
+		and b.point >  ${border2} and b.point &lt;  ${border1}
+		</if>
+		<if test='restype == "3" or resmokuai == "3"'>
+		and (b.point > -2 and b.point &lt;  ${border2} or b.point is null )
+		</if>
+		<if test='restype == "4" or resmokuai == "4"'>
+		and (b.point >= -2 or b.point is null )
+		</if>
+		<if test='web =="1" and web != null and web !=""'>
+		</if>
+		<if test='web !="1" and web != null and web !=""'>
+		and web = #{web}
+		</if>
+		<if test='datePicker != null and datePicker !="" and datePicker2 != null and datePicker2 !=""'>
+			and datetime>=#{datePicker} and datetime &lt;= #{datePicker2}
+		</if>
+		ORDER BY b.point desc  
+		<!--  and (b.point is not null) -->
+		
+<!-- 		<if test='checkmode == "6"'> -->
+<!-- 		)d left join cbjc_cbkpicture f on d.similarpicturename=f.picturename where d.picturepath is not null ORDER BY d.point desc -->
+<!-- 		</if> -->
+<!-- 		<if test='checkmode == "7"'> -->
+<!-- 		)d left join rljc_cbkpicture f on d.similarpicturename=f.picturename where d.picturepath is not null ORDER BY d.point desc -->
+<!-- 		</if> -->
+		
+		limit ${pagemax},20
+	</select>
+	
+	<select id="getresultexport" resultType="dbinfo" parameterType="map">
+		
+<!-- 		<if test='checkmode == "6" ||checkmode == "7"'> -->
+<!-- 		select d.*,f.cbkid from ( -->
+<!-- 		</if> -->
+		select c.pictureid,c.picturename,c.picturepath,c.pictureurl,c.web,b.point,b.similarpicturename,b.datetime,b.checkmode,b.cbkname from mission_picture c left JOIN
+		mission_result b on c.picturename =b.picturename 
+		where c.missionid = #{missionid} 
+		
+		<if test='restype == "1" or resmokuai == "1"'>
+		and b.point > ${border1}
+		</if>
+		<if test='restype == "2" or resmokuai == "2"'>
+		and b.point >  ${border2} and b.point &lt;  ${border1}
+		</if>
+		<if test='restype == "3" or resmokuai == "3"'>
+		and (b.point > -2 and b.point &lt;  ${border2} or b.point is null )
+		</if>
+		<if test='restype == "4" or resmokuai == "4"'>
+		and (b.point >= -2 or b.point is null )
+		</if>
+		<if test="pointmax != null and pointmax !='' and pointmin != null and pointmin !='' ">
+		and (b.point &lt;= #{pointmax} and b.point >= #{pointmin} )
+		<if test='pointmin == "0"'>
+		or b.point is null
+		</if>
+		)
+		</if>
+		<if test='web =="1" and web != null and web !=""'>
+		</if>
+		<if test='web !="1" and web != null and web !=""'>
+		and web = #{web}
+		</if>
+		<if test='datePicker != null and datePicker !="" and datePicker2 != null and datePicker2 !=""'>
+			and datetime>=#{datePicker} and datetime &lt;= #{datePicker2}
+		</if>
+		<if test='pictureid != null and pictureid !="" '>
+			and c.pictureid in (${pictureid})
+		</if>
+		ORDER BY b.point desc  
+		<!--  and (b.point is not null) -->
+		
+<!-- 		<if test='checkmode == "6"'> -->
+<!-- 		)d left join cbjc_cbkpicture f on d.similarpicturename=f.picturename where d.picturepath is not null ORDER BY d.point desc -->
+<!-- 		</if> -->
+<!-- 		<if test='checkmode == "7"'> -->
+<!-- 		)d left join rljc_cbkpicture f on d.similarpicturename=f.picturename where d.picturepath is not null ORDER BY d.point desc -->
+<!-- 		</if> -->
+		
+		
+	</select>
+	<!-- 查询网站范围 -->
+	<select id="getWebList" resultType="dbinfo" parameterType="map">
+		select c.web from mission_picture c left JOIN
+		mission_result b on c.picturename =b.picturename 
+		where c.missionid = #{missionid}
+	</select>
+	
+	<select id="getmissionbydatetime" resultType="dbinfo" parameterType="map">
+		select *
+		from mission_mission u
+		where datetime = #{datetime} 
+	</select>
+	
+	<insert id="insertpicture" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+			insert into mission_picture (picturename,picturepath,pictureurl,web,missionid,content,originalurl,tasktype,picturetime) 
+			values(#{item.picturename},#{item.picturepath},#{item.pictureurl},#{item.web},#{item.missionid},#{item.content},#{item.originalurl},#{item.tasktype},#{item.picturetime})
+		</foreach>
+	</insert>
+	
+	<insert id="insertresult" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+			insert into mission_result (picturename,point,missionid,similarpicturename,datetime,checkmode,cbkname) 
+			values(#{item.picturename},#{item.point},#{item.missionid},#{item.similarpicturename},#{item.datetime},#{item.checkmode},#{item.cbkname})
+		</foreach>
+	</insert>
+	<!-- 保存爬虫的图片信息 -->
+	<insert id="insetimagemessage" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+			insert into mission_picture (picturename,pictureurl,web,missionid) 
+			values(#{item.picname},#{item.picurl},#{item.website},#{item.id})
+		</foreach>
+	</insert>
+	
+	<update id="updatemission" parameterType="dbinfo">
+		UPDATE mission_mission 
+		SET
+		style = #{style}
+		WHERE missionid =#{missionid}
+	</update>
+	
+	<update id="updatepicturepath" parameterType="java.util.List">
+	<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+		UPDATE mission_picture 
+		SET
+		picturepath = #{item.picturepath}
+		WHERE picturename =#{item.picturename}
+	</foreach>
+	</update>
+	
+	<select id="getmissionalive" resultType="dbinfo" parameterType="map">
+		select *
+		from mission_mission u
+		where style in (0,5) 
+		order by missionid desc
+	</select>
+	
+	<update id="updatestartid" parameterType="dbinfo">
+		UPDATE mission_mission 
+		SET
+		pictureid = #{pictureid}
+		WHERE missionid =#{missionid}
+	</update>
+	
+	<delete id="updateStatusById"  parameterType="map">
+		UPDATE mission_mission
+		SET
+		style = #{style}
+		where missionid = #{missionid}
+	</delete>
+	
+	<insert id="insertDetectTask" parameterType="map" >
+		insert into detecttask (missionid,user,style,query,searchmode,checkmode,createtime) 
+		values(#{missionid},#{user},#{style},#{query},#{searchmode},#{checkmode},#{createtime})
+	</insert>
+	
+	<select id="queryMissionList" resultType="dbinfo" parameterType="map">
+		select *
+		from mission_mission u
+		where style = '5' and flag > '0'
+		order by missionid desc
+	</select>
+	
+	<select id="queryMissionStartList" resultType="dbinfo" parameterType="map">
+		select *
+		from mission_mission u
+		where style = '2' and flag > '0'
+		order by missionid desc
+	</select>
+	
+	<!-- 查询任务结果表，查看是否有数据 -->
+	<select id="getMissionResultById" resultType="dbinfo" parameterType="map">
+		select count(1) as style
+		from mission_result
+		where missionid = #{missionid}
+	</select>
+	<!-- 已经抓取的图片数量 -->
+	<select id="getPictureCountById" resultType="dbinfo" parameterType="map">
+		select count(1) as similarpicutreid
+		from mission_picture
+		where missionid = #{missionid}
+	</select>
+	<!-- 查询任务状态 -->
+	<select id="getMissionStatusById" resultType="dbinfo" parameterType="map">
+		select *
+		from mission_mission
+		where missionid = #{missionid}
+	</select>
+	
+	
+	<select id="getpictures" resultType="dbinfo" parameterType="dbinfo">
+		select *
+		from mission_picture
+		where missionid = #{missionid}
+		limit ${startid},20
+	</select>
+	
+	<!-- 查询未完成的任务表 -->
+	<select id="getMissionListByFlag" resultType="dbinfo" parameterType="map">
+		select *
+		from mission_mission
+		where flag='1' and style in ('1','2','3','4')
+	</select>
+	
+	<!-- 根据missionid查询任务 -->
+	<select id="getDbinfoById" resultType="dbinfo" parameterType="map">
+		select *
+		from mission_mission u
+		where missionid = #{missionid} and flag = '1'
+	</select>
+	
+	<!-- 根据任务id，从表mission_mission中查询正在执行的任务列表，返回一个list集合 -->
+	<select id="getdbinfoListByMissionid" resultType="dbinfo" parameterType="map">
+		SELECT * FROM mission_mission mm WHERE mm.style = '2' AND mm.flag = 1 AND mm.missionid in (SELECT mr.missionid FROM mission_robot mr WHERE mr.flag = '1' AND mr.robotid = (SELECT mrr.robotid FROM mission_robot mrr WHERE mrr.missionid = #{missionid}))
+	</select>
+	
+	<!-- 根据用户名查询正在执行的任务信息 -->
+	<select id="getdbinfoRunningListByName" resultType="dbinfo" parameterType="map">
+		SELECT * FROM mission_mission m WHERE m.user=#{name} AND m.style='2' AND m.flag='1'
+	</select>
+	
+	<!-- 查询出与该机器人相关的任务列表 -->
+	<select id="getMissionListByTask" resultType="dbinfo" parameterType="map">
+		SELECT * FROM mission_mission mm WHERE mm.style in ('1','2','3','4') AND mm.missionid in (SELECT m.missionid FROM mission_robot m WHERE m.robotid=(SELECT c.taskid FROM collecttask c WHERE c.missionid=#{missionid}))
+	</select>
+	
+	<!-- 查询未停止的任务表 -->
+    <select id="getDbinfoListForOverdue" resultType="dbinfo" parameterType="map">
+        select *
+        from mission_mission
+        where flag='1' and style not in ('1','3')
+    </select>
+    
+    <!-- 修改任务状态为3 -->
+    <update id="updateStyleByMissionid" parameterType="map">
+        UPDATE mission_mission 
+        SET
+        style = #{style}
+        WHERE missionid =#{missionid}
+    </update>
+    
+    <!-- 查询出与该机器人相关的正在执行的任务列表 -->
+    <select id="getInfoListById" resultType="dbinfo" parameterType="map">
+        SELECT * FROM mission_mission mm WHERE mm.style ='2' AND mm.missionid in (SELECT m.missionid FROM mission_robot m WHERE m.robotid=(SELECT c.taskid FROM collecttask c WHERE c.missionid=#{missionid}))
+    </select>
+	
+    <!-- 更新暂停任务信息 -->
+    <update id="updateMissionStyleByid" parameterType="map">
+        UPDATE mission_mission 
+        SET
+        query = #{query},
+        style = #{style}
+        WHERE missionid =#{missionid}
+    </update>
+    
+    <!-- 根据开始结束时间查询符合条件的属地数据 -->
+    <select id="getPicturesByTime" resultType="dbinfo" parameterType="map">
+        select DISTINCT picturename,picturepath,pictureurl,content,originalurl,tasktype,picturetime FROM mission_picture WHERE tasktype='L' AND picturetime >=str_to_date(#{e_time}, '%Y-%m-%d %H:%i') AND picturetime &lt; str_to_date(#{nowTime}, '%Y-%m-%d %H:%i') ORDER BY picturetime ASC
+    </select>
+    
+    <!-- 更新任务信息状态 -->
+    <delete id="updateMissionById"  parameterType="map">
+        UPDATE mission_mission
+        SET
+        query=#{query},
+        flag='0'
+        where missionid = #{missionid}
+    </delete>
+    
+    <!-- 更新任务信息状态 -->
+    <update id="updateMissionStatusById"  parameterType="map">
+        UPDATE mission_mission
+        SET
+        collectstatus=#{status}
+        where missionid = #{missionid}
+    </update>
+    
+</mapper>

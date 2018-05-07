@@ -1,0 +1,111 @@
+<beans xmlns="http://www.springframework.org/schema/beans"  
+ xmlns:context="http://www.springframework.org/schema/context"  
+ xmlns:p="http://www.springframework.org/schema/p"  
+ xmlns:aop="http://www.springframework.org/schema/aop"
+ xmlns:tx="http://www.springframework.org/schema/tx"
+ xmlns:mvc="http://www.springframework.org/schema/mvc"  
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+ xsi:schemaLocation="http://www.springframework.org/schema/beans  
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd  
+      http://www.springframework.org/schema/aop 
+      http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+      http://www.springframework.org/schema/context  
+      http://www.springframework.org/schema/context/spring-context.xsd  
+      http://www.springframework.org/schema/tx	
+      http://www.springframework.org/schema/tx/spring-tx.xsd 	
+      http://www.springframework.org/schema/mvc  
+      http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">  
+      
+     <!-- 启动注解驱动的Spring MVC功能，注册请求url和注解POJO类方法的映射-->  
+     <mvc:annotation-driven />  
+     <!-- 启动包扫描功能，以便注册带有@Controller、@Service、@repository、@Component等注解的类成为spring的bean -->  
+     <context:component-scan base-package="monitor" />
+     <!-- 对模型视图名称的解析，在请求时模型视图名称添加前后缀 -->
+     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:prefix="/pages/" p:suffix=".jsp" />
+	
+	<!-- 使用annotation自动注册bean，并保证@Required，@Autowired的属性被注入 -->
+    <context:annotation-config />
+	
+	<!-- 读取数据源配置文件 -->
+	<bean id="dataSoucresConfig" class="monitor.common.servlet.PropertyPlaceholderConfigurerInfo">
+		<property name="locations" value="classpath:config/properties/jdbc.properties" />
+	</bean>
+	
+	<bean id="basicDataSource" class="com.jolbox.bonecp.BoneCPDataSource" destroy-method="close">
+	   <property name="driverClass" value="${jdbc.driverClass}" />
+	   <property name="idleConnectionTestPeriodInMinutes" value="${jdbc.idleConnectionTestPeriodInMinutes}" />
+	   <property name="idleMaxAgeInMinutes" value="${jdbc.idleMaxAgeInMinutes}" />
+	   <property name="maxConnectionsPerPartition" value="${jdbc.maxConnectionsPerPartition}" />
+	   <property name="minConnectionsPerPartition" value="${jdbc.minConnectionsPerPartition}" />
+	   <property name="partitionCount" value="${jdbc.partitionCount}" />
+	   <property name="acquireIncrement" value="${jdbc.acquireIncrement}" />
+	   <property name="statementsCacheSize" value="${jdbc.statementsCacheSize}" />
+	   <property name="logStatementsEnabled" value="${jdbc.logStatementsEnabled}" />
+	</bean>
+	<!-- local本地 DBSource -->
+	<bean id="publicDBSource" parent="basicDataSource">
+		<property name="jdbcUrl" value="${jdbc.url.jdbcUrl}" />
+	   	<property name="username" value="${jdbc.username}"/>
+	   	<property name="password" value="${jdbc.password}"/>
+	</bean>
+	<!-- data source 抽象类 -->
+	<bean id="absDataSource" class="monitor.common.dbSource.DynamicDataSource">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry value-ref="publicDBSource" key="public"></entry>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" ref="publicDBSource"></property>
+	</bean>
+	
+	<!-- MyBatis SQLSessionFactory -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="absDataSource" />
+		<property name="configLocation" value="classpath:config/mybatis/Configuration.xml" />
+		<property name="mapperLocations">
+			<list>
+				<value>classpath*:config/mybatis/sqlMapper/webview/*.xml</value>
+			</list>
+		</property>
+	</bean>
+	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+ 	<!-- 支持上传文件 -->  
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"
+		p:defaultEncoding="UTF-8"
+	/>
+	
+	<mvc:view-controller path="/" view-name="redirect:/login/login.do" /> 	
+	<!-- 拦截器 暂时注销-->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/> 
+<!-- 			<mvc:exclude-mapping path="/login/loginPage.do"/> -->
+<!-- 			<mvc:exclude-mapping path="/login/login.do"/> -->
+<!-- 			<mvc:exclude-mapping path="/login/getVcode.do"/> -->
+<!-- 			<mvc:exclude-mapping path="/login/getRandomCode.do"/> -->
+<!-- 			<mvc:exclude-mapping path="/facedetect/receiveUrl.do"/> -->
+<!-- 			<mvc:exclude-mapping path="/picture/api.do"/> -->
+			<bean class="monitor.common.interceptor.CommonInterceptor" /> 
+		</mvc:interceptor>   
+	</mvc:interceptors>
+	
+	<!-- 事务管理器注解配置 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    	<property name="dataSource" ref="absDataSource" />
+	</bean>
+	<!-- 使用annotation定义事务-->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    <!-- 自动spring ApplicationContext 到对象中 -->
+    <bean id="SpringUtil"  class="monitor.util.SpringUtil"></bean>
+<!--     mq接收端 图片下载任务   -->
+<!--     <bean id="mqmissionreceive"  class="monitor.activemq.ReceiveMessageByMqmission"  init-method="receivemission"> -->
+<!--     </bean> -->
+
+<!--     	 定时器  -->
+ 	<import resource="timerQuartz.xml"/>
+
+
+ 	
+</beans>  

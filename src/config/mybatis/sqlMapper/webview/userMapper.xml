@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="userMapper">
+	
+	<select id="getUserInfoByName" resultType="loginUser" parameterType="map">
+		select * from user u
+		where u.name="${name}"
+	</select>
+	
+	<!-- 根据missionid查询出创建用户的信息 -->
+	<select id="getInfoByMissionid" resultType="loginUser" parameterType="map">
+		SELECT * FROM user u LEFT JOIN mission_mission m ON u.name=m.user WHERE m.missionid='${missionid}'
+	</select>
+	
+	<!-- 根据ID删除用户信息 -->
+	<delete id="deleteUser" parameterType="map">
+		delete from user where id = #{id}
+	</delete>
+
+	<!-- 修改用户權限信息 -->
+	<update id="updateUserByID" parameterType="map">
+		update user set name=#{name} ,password=#{password} ,role=#{role},num=#{num},border1=#{border1},border2=#{border2} where id=#{id}
+	</update>
+	
+	<!-- 根据ID查找用户信息 -->
+	<select id="findUserByID" resultType="loginUser" parameterType="map">
+		select * from user u where u.id = #{id}
+	</select>
+	
+	<!-- 批量删除用户信息 -->
+	<delete id="deleteCheckedUser" parameterType="map">
+		delete from user where id in 
+		<foreach item="idItem" collection="array" open="(" separator="," close=")">
+		#{id}
+		</foreach>
+	</delete>
+	
+	<!-- 模糊查询用户信息 -->
+	<select id="searchUser" resultType="loginUser" parameterType="map">
+		select * from user  where name like  CONCAT('%', #{name}, '%')   
+	</select>
+	
+	<!-- 查询所有用户 -->
+	<select id="getAllUser" resultType="loginUser" parameterType="map">
+		select * from user 
+	</select>
+	
+	<select id="getUserInfo" resultType="loginUser" parameterType="map">
+		select * from user u
+		where name="${name}" and password="${password}" 
+	</select>
+	
+	<!-- 增加用户 -->
+	<insert id="addUser" parameterType="map">
+		INSERT INTO `user` (name, realName, password,role,date,num,border1,border2,sinausername,sinapassword,sinaappid,sinaappkey,sinalocal)
+		VALUES (#{name}, #{realName}, #{password},#{role},NOW(),#{num},'0.5','0.6','chwx','chwx62115358','23088','VVTpgCDsCcFRLP3Zi7Ig','')
+	</insert>
+	
+<!-- 	<insert id="addUser" parameterType="map"> -->
+<!-- 		INSERT INTO `user` (name, realName, password,role,date,num,border1,border2) -->
+<!-- 		VALUES (#{name}, #{realName}, #{password},#{role},NOW(),#{num},#{border1},#{border1}) -->
+<!-- 	</insert> -->
+	<!-- 注册用户,查看用户是否存在 -->
+	<select id="getUserByName" resultType="loginUser" parameterType="map">
+		select * from user where name = #{name} limit 1
+	</select>
+	<!-- 根据条件查询用户信息-->	
+	<select id="getUsers" resultType="loginUser" parameterType="map">
+		select * from user limit ${start},${limit}
+	</select>
+	
+	<select id="getAllUserCount" resultType="int" parameterType="map">
+		select count(*) from user where name <![CDATA[ <> ]]> 'admin'
+	</select>
+	
+	<!-- 模糊查询的分页 -->
+	<select id="getSearchUserCount" resultType="int" parameterType="map">
+		select count(*) from user where name like  CONCAT('%', #{name}, '%')  
+	</select>
+	
+	<!-- 带条件的模糊查询的分页 -->
+	<select id="getSearchMinUserCount" resultType="int" parameterType="map">
+		select count(*) from user where name like  CONCAT('%', #{name}, '%')  
+	</select>
+	
+	<!-- 模糊查询前的的分页，为了排除admin -->
+	<select id="searchedUser" resultType="loginUser" parameterType="map">
+		select * from user where name like  CONCAT('%', #{name}, '%')  
+	</select>
+	
+	<!-- 修改用户信息 -->
+	<update id="modifyUser" parameterType="map">
+		update User set name=#{name},realName=#{realName},password=#{password},email=#{email},tel=#{tel},money=#{money}
+		where id=#{id}
+	</update>
+	<update id="modifyPwd" parameterType="map">
+		update User set password=#{password} where id=#{userid}
+	</update>
+	<!-- 根据手机号获得用户 -->
+	<select id="getUserByTel" resultType="loginUser" parameterType="map">
+		select u.id from user u	where tel=#{tel} limit 1
+	</select>
+	<select id="getUserById" resultType="loginUser" parameterType="map">
+		select * from user u where id = #{userid}
+	</select>
+	
+	<update id="modifyUType" parameterType="map">
+		update User set utype=#{utype} where name=#{name}
+	</update>
+	
+	<!-- 分頁查詢用戶 -->
+	<select id="getPageUsers" parameterType="page" resultMap="result">
+		select id,name from user   
+		<if test="name==null and name==''">  
+		    
+		</if> 
+		<if test="name!=null and name!=''">
+		where name like  CONCAT('%', #{name}, '%')
+		</if>
+		  ORDER BY id DESC limit #{startPos},#{pageSize} 
+	</select>
+	
+	<!-- 模糊查詢分頁用戶 -->
+	<select id="getSearchPageUsers" parameterType="page" resultMap="result">
+		select id,name from user  where name like  CONCAT('%', #{name}, '%')   ORDER BY id DESC limit #{startPos},#{pageSize} 
+	</select>
+	
+	<!-- 日志表插数据-->
+	<insert id="insertToTableGlag" parameterType="map" >
+		insert into table_flag (loginAdmin,delName,login_ip,date) values(#{loginAdmin},#{delName},#{login_ip},#{date})
+	</insert>
+	
+	<!-- 根据appid和appkey获取相同的的用户信息-->
+	<select id="getdbinfoListByAppInfo" resultType="loginUser" parameterType="map">
+        SELECT * FROM user WHERE sinaappid=#{sinaappid} AND sinaappkey=#{sinaappkey}  
+    </select>
+    
+    <select id="getAuthorityByMissionid" resultType="loginUser" parameterType="map">
+    select * from user u
+    where u.name=(SELECT user FROM mission_mission m WHERE m.missionid=#{missionid})
+    </select>
+	
+	<resultMap id="result" type="loginUser">
+		<result property="id" column="id" />
+		<result property="name" column="name" />
+	</resultMap>
+</mapper>

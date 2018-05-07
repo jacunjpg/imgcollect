@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rljcMapper">
+	<!-- 插入拷贝检测任务 -->
+	<insert id="inserttomission" parameterType="map" >
+		insert into rljc_mission (datetime,user,style) values(#{datetime},#{user},#{style})
+	</insert>
+	
+	<select id="getmaxmissionid" resultType="dbinfo" parameterType="map">
+		select MAX(missionid) as missionid from rljc_mission u
+	</select>
+	
+	<select id="getcbklist" resultType="dbinfo" parameterType="map">
+		select cbkid,cbkname,description,picturepath from rljc_cbklist u where user = #{user}
+	</select>
+	
+	<insert id="inserttocbklist" parameterType="map" >
+		insert into rljc_cbklist (cbkname,description,user,picturepath) values(#{cbkname},#{description},#{user},#{picturepath})
+	</insert>
+	
+	<select id="getmaxcbkid" resultType="dbinfo" parameterType="map">
+		select cbkid from rljc_cbklist u where cbkname = #{cbkname} and description = #{description} and user = #{user}
+	</select>
+	
+	<insert id="insertcbkpicture" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+			insert into rljc_cbkpicture (picturename,picturepath,cbkid,description) 
+			values(#{item.picturename},#{item.picturepath},#{item.cbkid},#{item.description})
+		</foreach>
+	</insert>
+	
+	<update id="updatecbkcover" parameterType="map">
+		UPDATE rljc_cbklist 
+		SET
+		picturepath = #{picturepath}
+		WHERE cbkid =#{cbkid}
+	</update>
+	
+	<select id="getcbkpicbyid" resultType="dbinfo" parameterType="map">
+		select pictureid,picturename,picturepath,cbkid
+		from rljc_cbkpicture u 
+		where cbkid = #{cbkid}
+	</select>
+	
+	<select id="getcbkpicbypicid" resultType="dbinfo" parameterType="map">
+		select picturepath,cbkid,picturename
+		from rljc_cbkpicture
+		where pictureid in (${pictureid})
+	</select>
+	
+	<delete id="deletcbkpicbycbkid"  parameterType="map">
+		delete from rljc_cbkpicture
+		where cbkid = #{cbkid}
+	</delete>
+	
+	<delete id="deletcbkpicinpicid"  parameterType="map">
+		delete from rljc_cbkpicture
+		where pictureid in (${pictureid})
+	</delete>
+	
+	<delete id="deletcbklistbycbkid"  parameterType="map">
+		delete from rljc_cbklist
+		where cbkid = #{cbkid}
+	</delete>
+	
+	<select id="getmissionlistbyuser" resultType="dbinfo" parameterType="map">
+		select missionid,datetime,style 
+		from rljc_mission u
+		where user = #{user} 
+		order by missionid desc
+	</select>
+	
+	<insert id="inserttopicture" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+			insert into rljc_picture (picturename,picturepath,pictureurl,web,missionid) 
+			values(#{item.picturename},#{item.picturepath},#{item.pictureurl},#{item.web},#{item.missionid})
+		</foreach>
+	</insert>
+	
+	<select id="getresultbymissionid" resultType="dbinfo" parameterType="map">
+		select pictureid,picturename,picturepath,pictureurl,count(point) as count from
+		(select a.pictureid,a.picturename,a.picturepath,a.pictureurl,a.missionid,b.point 
+		from rljc_picture a left join rljc_result b
+		on a.picturename = b.picturename
+		where a.missionid = #{missionid}
+		<if test="output == 'all'">
+			and (b.point >= #{pointmin} and b.point &lt;= #{pointmax} or b.point is null)
+		</if>
+		<if test="output == 'onlypoint'">
+			and (b.point >= #{pointmin} and b.point &lt;= #{pointmax})
+		</if>
+		<if test="output == 'onlynull'">
+			and (b.point is null)
+		</if>
+		) c GROUP BY c.pictureid 
+		order by count DESC
+		
+	 </select>
+	 
+	 <select id="getpictureresultbypictureid" resultType="dbinfo" parameterType="map">
+		SELECT d.pictureid,d.similarpicturename,d.picturepath,d.point,d.cbkid from rljc_picture a RIGHT JOIN 
+		(select c.pictureid,b.picturename,b.point,b.similarpicturename,c.picturepath,c.cbkid
+		from rljc_result b left join rljc_cbkpicture c 
+		on b.similarpicturename = c.picturename) d
+		on a.picturename=d.picturename WHERE a.pictureid = #{pictureid}
+		and (d.point >= #{pointmin} and d.point &lt;= #{pointmax})
+		
+	 </select>
+	 
+	 <select id="getpictureinfobypictureid" resultType="dbinfo" parameterType="map">
+		select pictureid,picturepath,pictureurl
+		from rljc_picture u
+		where pictureid = #{pictureid} 
+	</select>
+	
+	 <select id="getmissioninfo" resultType="dbinfo" parameterType="map">
+		select * from rljc_mission u
+		where  user = #{user} and datetime = #{datetime}
+	</select>
+	
+	<insert id="insertresult" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+			insert into rljc_result (picturename,point,missionid,similarpicturename,datetime) 
+			values(#{item.picturename},#{item.point},#{item.missionid},#{item.similarpicturename},#{item.datetime})
+		</foreach>
+	</insert>
+	
+	<update id="updatemission" parameterType="dbinfo">
+		UPDATE rljc_mission 
+		SET
+		style = #{style}
+		WHERE missionid =#{missionid}
+	</update>
+	
+	<delete id="deletemission" parameterType="dbinfo">
+		delete from rljc_mission 
+		WHERE missionid =#{missionid};
+		delete from rljc_picture
+		WHERE missionid =#{missionid};
+		delete from rljc_result
+		WHERE missionid =#{missionid};
+	</delete>
+</mapper>

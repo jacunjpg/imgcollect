@@ -1,0 +1,8 @@
+大系统: http://wp.easyinfo.net.cn/network/pages/mainPage.jsp  admin chwx1234
+大系统MQ: http://42.96.202.216:8161/admin/queues.jsp
+BJWXB系统: http://123.57.43.71/chnet/pages/login.jsp  admin chwx4321
+新系统: http://42.96.171.117:8080/network/login/ulogin.do admin chwx1234
+铄金系统:　http://182.92.64.214/monitor/login/loginPage.do　admin chwx1234
+
+
+

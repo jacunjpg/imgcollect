@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="webSitePicture">
+	
+	<select id="insertWebSite" parameterType="java.util.List">
+		INSERT INTO website_picture (picname,picurl,website,createtime)
+        VALUES
+        <foreach collection="list" item="website" index="index" separator=",">
+         (
+         #{website.picname},
+         #{website.picurl},
+         #{website.website},
+         #{website.createtime}
+         )
+        </foreach>
+	</select>
+	
+</mapper>

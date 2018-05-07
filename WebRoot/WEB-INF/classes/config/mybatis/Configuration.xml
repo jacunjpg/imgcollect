@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd"> 
+<configuration>
+	<typeAliases>
+		<typeAlias alias="loginUser" type="monitor.webview.entity.LoginUser"/>
+		<typeAlias alias="User_Authority" type="monitor.webview.entity.User_Authority"/>
+		<typeAlias alias="page" type="monitor.webview.entity.Page"/>
+		<typeAlias alias="dbinfo" type="monitor.webview.entity.dbinfo"/>
+		<typeAlias alias="picture" type="monitor.webview.entity.PictureInfo"/>
+		<typeAlias alias="webSitePicture" type="monitor.webview.entity.WebSitePicture"/>
+		<typeAlias alias="Collecttask" type="monitor.webview.entity.Collecttask"/>
+		<typeAlias alias="MissionRobot" type="monitor.webview.entity.MissionRobot"/>
+		
+	</typeAliases>
+</configuration>
